@@ -5,13 +5,23 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import pe.edu.utp.toolsteacherutp.Controllers.CourseController;
+import pe.edu.utp.toolsteacherutp.Interfaces.APIClient;
+import pe.edu.utp.toolsteacherutp.Rest.AccessToken;
+import pe.edu.utp.toolsteacherutp.Services.ServiceGenerator;
+import pe.edu.utp.toolsteacherutp.Models.User;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String API_OAUTH_CLIENTID = "W3N0vZJiyKWQNb3mUSNrcDVPybWLXz";
+    public static final String API_OAUTH_CLIENTSECRET = "JTCwU8vEr4pnUcyYztQnU31PSz0PlY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-       FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -28,9 +38,44 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        CourseController courseController = new CourseController( );
+        //CourseController courseController = new CourseController( );
+        //courseController.start();
 
-        courseController.start();
+        APIClient loginService = ServiceGenerator.createService(APIClient.class, API_OAUTH_CLIENTID, API_OAUTH_CLIENTSECRET );
+        Call<AccessToken> call = loginService.getNewAccessToken( "dulanto", "123523","password" );
+        call.enqueue(new Callback<AccessToken >() {
+            @Override
+            public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
+                try {
+                    Log.e( "aaa", response.body().getAccessToken() + "" );
+                    APIClient loginService = ServiceGenerator.createService(APIClient.class,  response.body(), getApplicationContext() );
+                    Call<User> callUserMe = loginService.getUserMe();
+                    callUserMe.enqueue(new Callback<User>() {
+                        @Override
+                        public void onResponse(Call<User> call, Response<User> response) {
+                            try {
+                                Log.e( "aaa", response.body().getId() + "" );
+                            } catch ( NullPointerException e){
+                                Log.e( "aaa", e.getMessage() );
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<User> call, Throwable t) {
+                            Log.e( "aaa", "asdasd" );
+                        }
+                    } );
+
+                } catch ( NullPointerException e){
+                    Log.e( "aaa", e.getMessage() );
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AccessToken> call, Throwable t) {
+                Log.e( "aaa", "asdasd" );
+            }
+        } );
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
