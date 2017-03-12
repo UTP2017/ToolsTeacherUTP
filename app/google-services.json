@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "60038516907-1j0r96uj9hn80jbac4vtkjduorvfmh0o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pe.edu.utp.toolsteacherutp",
+            "certificate_hash": "2afc689ea5cdc76f212a7c5c87782d7eec46a6af"
+          }
+        },
+        {
           "client_id": "60038516907-192dnlr2kvv83l1tdbfo2jcuut1o9fjo.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "60038516907-192dnlr2kvv83l1tdbfo2jcuut1o9fjo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

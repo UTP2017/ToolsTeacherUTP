@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONObject;
 
@@ -301,19 +302,22 @@ public class MainActivity extends AppCompatActivity  {
                     APIClient tokenDevice = ServiceGenerator.createService(APIClient.class, accessToken , getApplicationContext(), false );
                     String token = FirebaseInstanceId.getInstance().getToken();
                     Log.e( "token", token );
+                    if ( token != null ){
+                        Call<Void> callUserMe = tokenDevice.registerDeviceNotification( token, "Android", currentUser.getCorreo() );
+                        callUserMe.enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                Log.e( "token", response.code() + "" );
+                                //FirebaseMessaging.getInstance().subscribeToTopic("news");
+                            }
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                                Log.e( "token onFailure", t.getMessage() );
+                                swipeContainer.setRefreshing(false);
+                            }
+                        } );
 
-                    Call<Void> callUserMe = tokenDevice.registerDeviceNotification( token, "Android", currentUser.getCorreo() );
-                    callUserMe.enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            Log.e( "token", response.code() + "" );
-                        }
-                        @Override
-                        public void onFailure(Call<Void> call, Throwable t) {
-                            Log.e( "token onFailure", t.getMessage() );
-                            swipeContainer.setRefreshing(false);
-                        }
-                    } );
+                    }
                     if ( currentUser.getSecciones().size() > 0 )  {
                         dateHorarios = new ArrayList<>();
                         setupHorarios( now, currentUser, refresh );
