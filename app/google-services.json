@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "60038516907",
+    "firebase_url": "https://toolsteacherutp.firebaseio.com",
+    "project_id": "toolsteacherutp",
+    "storage_bucket": "toolsteacherutp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:60038516907:android:a8baaf647bc3ef13",
+        "android_client_info": {
+          "package_name": "pe.edu.utp.toolsteacherutp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "60038516907-192dnlr2kvv83l1tdbfo2jcuut1o9fjo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7miZQIXOZHp2H_SUNX_P8oBab7YezYKY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

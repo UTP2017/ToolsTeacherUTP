@@ -78,7 +78,7 @@ public class ServiceGenerator {
         return retrofit.create(serviceClass);
     }
 
-    public static <S> S createService(Class<S> serviceClass, AccessToken accessToken, Context c) {
+    public static <S> S createService(Class<S> serviceClass, AccessToken accessToken, final String path, Context c) {
         httpClient = new OkHttpClient.Builder();
         builder = new Retrofit.Builder()
                 .baseUrl(API_BASE_URL)
@@ -94,11 +94,55 @@ public class ServiceGenerator {
                     Request original = chain.request();
                     Request.Builder requestBuilder = original.newBuilder()
                             .header("Accept", "application/json")
-                            //.header("Content-type", "application/json")
-                            //.header("Content-type", "application/x-www-form-urlencoded")
+                            .header("Content-Disposition", "attachment; filename=\"" + path + "\"")
                             .header("Authorization",
                                     token.getTokenType() + " " + token.getAccessToken())
                             .method(original.method(), original.body());
+
+                    Request request = requestBuilder.build();
+                    return chain.proceed(request);
+                }
+            });
+        }
+
+        OkHttpClient client = httpClient.build();
+        Retrofit retrofit = builder.client(client).build();
+        return retrofit.create(serviceClass);
+    }
+
+    public static <S> S createService(Class<S> serviceClass, AccessToken accessToken, Context c, final boolean json) {
+        httpClient = new OkHttpClient.Builder();
+        builder = new Retrofit.Builder()
+                .baseUrl(API_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create());
+
+        if(accessToken != null) {
+            mContext = c;
+            mToken = accessToken;
+            final AccessToken token = accessToken;
+            httpClient.addInterceptor(new Interceptor() {
+                @Override
+                public Response intercept(Chain chain) throws IOException {
+                    Request original = chain.request();
+                    Request.Builder requestBuilder;
+                    if ( json ){
+                        requestBuilder = original.newBuilder()
+                                .header("Accept", "application/json")
+                                //.header("Content-type", "application/json")
+                                //.header("Content-type", "application/x-www-form-urlencoded")
+                                .header("Authorization",
+                                        token.getTokenType() + " " + token.getAccessToken())
+                                .method(original.method(), original.body());
+                    }
+                    else {
+                        requestBuilder = original.newBuilder()
+                                //.header("Accept", "application/json")
+                                //.header("Content-type", "application/json")
+                                //.header("Content-type", "application/x-www-form-urlencoded")
+                                .header("Authorization",
+                                        token.getTokenType() + " " + token.getAccessToken())
+                                .method(original.method(), original.body());
+                    }
 
                     Request request = requestBuilder.build();
                     return chain.proceed(request);
