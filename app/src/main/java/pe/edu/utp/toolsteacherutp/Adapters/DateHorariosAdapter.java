@@ -3,7 +3,6 @@ package pe.edu.utp.toolsteacherutp.Adapters;
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,8 +46,7 @@ public class DateHorariosAdapter extends RecyclerView.Adapter<DateHorariosAdapte
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.date_horarios_layout, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
-        return viewHolder;
+        return new ViewHolder(view);
     }
 
     @Override
@@ -56,8 +54,6 @@ public class DateHorariosAdapter extends RecyclerView.Adapter<DateHorariosAdapte
         SimpleDateFormat formatDateNumber = new SimpleDateFormat("d", Locale.getDefault());
         SimpleDateFormat formatDate= new SimpleDateFormat("EEE\nMMM\nyyyy", Locale.getDefault());
 
-
-        Log.e( "Calendar",this.dateHorarioses.get(position).getDate().toString() );
         String dateNumber = formatDateNumber.format( this.dateHorarioses.get(position).getDate() );
         String date = formatDate.format( this.dateHorarioses.get(position).getDate() );
 
@@ -84,14 +80,14 @@ public class DateHorariosAdapter extends RecyclerView.Adapter<DateHorariosAdapte
         super.onAttachedToRecyclerView(recyclerView);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         TextView dateNumberTextView;
         TextView dateDescTextView;
         RecyclerView horariosRecyclerView;
         RecyclerView.LayoutManager mHorariosLayoutManager;
         HorarioAdapter horarioAdapter;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             dateNumberTextView = (TextView) itemView.findViewById(R.id.dateNumberTextView);
             dateDescTextView = (TextView) itemView.findViewById(R.id.dateDescTextView);

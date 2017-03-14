@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:background="@color/colorDividerLight"
-    tools:context="pe.edu.utp.toolsteacherutp.MainActivity">
+    tools:context="pe.edu.utp.toolsteacherutp.Activities.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_height="wrap_content"

@@ -24,5 +24,6 @@ public class FBInstanceIdService extends FirebaseInstanceIdService {
     }
     private void sendRegistrationToServer(String token) {
         // TODO: Implement this method to send token to your app server.
+        Log.d(TAG, "Refreshed token: " + token);
     }
 }

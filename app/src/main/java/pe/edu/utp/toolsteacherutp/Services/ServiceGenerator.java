@@ -1,26 +1,17 @@
 package pe.edu.utp.toolsteacherutp.Services;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.text.TextUtils;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.google.gson.Gson;
 
 import java.io.IOException;
-import okhttp3.Authenticator;
+
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.Route;
 import pe.edu.utp.toolsteacherutp.BuildConfig;
-import pe.edu.utp.toolsteacherutp.Rest.AccessToken;
-import retrofit2.Call;
-import retrofit2.Callback;
+import pe.edu.utp.toolsteacherutp.Models.AccessToken;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 /**

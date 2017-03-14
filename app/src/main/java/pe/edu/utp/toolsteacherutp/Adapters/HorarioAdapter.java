@@ -2,14 +2,12 @@ package pe.edu.utp.toolsteacherutp.Adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import java.util.List;
-
-import pe.edu.utp.toolsteacherutp.Models.DateHorarios;
 import pe.edu.utp.toolsteacherutp.Models.Horario;
 import pe.edu.utp.toolsteacherutp.R;
 
@@ -21,14 +19,14 @@ public class HorarioAdapter extends RecyclerView.Adapter<HorarioAdapter.ViewHold
     private List<Horario> horarios;
     private Context mContext;
 
-    public HorarioAdapter(List<Horario> horarios, Context mContext) {
+    HorarioAdapter(List<Horario> horarios, Context mContext) {
         this.horarios = horarios;
         this.mContext=mContext;
     }
 
-    public void updateData(List<Horario> horarios) {
+    public void updateData(List<Horario> _horarios) {
         horarios.clear();
-        horarios.addAll(horarios);
+        horarios.addAll(_horarios);
         notifyDataSetChanged();
     }
 
@@ -43,9 +41,8 @@ public class HorarioAdapter extends RecyclerView.Adapter<HorarioAdapter.ViewHold
 
     @Override
     public HorarioAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.horario_layout, parent, false);
-        HorarioAdapter.ViewHolder viewHolder = new HorarioAdapter.ViewHolder(view);
-        return viewHolder;
+        View view = LayoutInflater.from(mContext).inflate(R.layout.horario_layout, parent, false);
+        return new HorarioAdapter.ViewHolder(view);
     }
 
     @Override
@@ -67,13 +64,13 @@ public class HorarioAdapter extends RecyclerView.Adapter<HorarioAdapter.ViewHold
         super.onAttachedToRecyclerView(recyclerView);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         TextView hourBetweenTextView;
         TextView courseNameTextView;
         TextView labNameTextView;
         TextView sedeNameTextView;
         TextView seccionNameTextView;
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             hourBetweenTextView = (TextView) itemView.findViewById(R.id.hourBetweenTextView);
             courseNameTextView = (TextView) itemView.findViewById(R.id.courseNameTextView);

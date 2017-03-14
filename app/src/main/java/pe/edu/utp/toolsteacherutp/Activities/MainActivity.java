@@ -1,7 +1,10 @@
-package pe.edu.utp.toolsteacherutp;
+package pe.edu.utp.toolsteacherutp.Activities;
 
+import android.app.Application;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,9 +23,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.messaging.FirebaseMessaging;
-
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,12 +40,15 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import pe.edu.utp.toolsteacherutp.Adapters.DateHorariosAdapter;
+import pe.edu.utp.toolsteacherutp.BuildConfig;
 import pe.edu.utp.toolsteacherutp.Interfaces.APIClient;
 import pe.edu.utp.toolsteacherutp.Models.DateHorarios;
 import pe.edu.utp.toolsteacherutp.Models.Horario;
 import pe.edu.utp.toolsteacherutp.Models.Media;
 import pe.edu.utp.toolsteacherutp.Models.Seccion;
-import pe.edu.utp.toolsteacherutp.Rest.AccessToken;
+import pe.edu.utp.toolsteacherutp.MyAplication;
+import pe.edu.utp.toolsteacherutp.R;
+import pe.edu.utp.toolsteacherutp.Models.AccessToken;
 import pe.edu.utp.toolsteacherutp.Services.ServiceGenerator;
 import pe.edu.utp.toolsteacherutp.Models.User;
 import retrofit2.Call;
@@ -58,19 +61,17 @@ public class MainActivity extends AppCompatActivity  {
     static final int REQUEST_TAKE_PHOTO = 1;
     private SwipeRefreshLayout swipeContainer;
     private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/jpg");
-    String mCurrentPhotoPath;
-    public static final String API_OAUTH_CLIENTID = "W3N0vZJiyKWQNb3mUSNrcDVPybWLXz";
-    public static final String API_OAUTH_CLIENTSECRET = "JTCwU8vEr4pnUcyYztQnU31PSz0PlY";
+    private String mCurrentPhotoPath;
 
     private AccessToken currentToken;
-
-    ProgressDialog progress;
-    List<DateHorarios> dateHorarios;
-    RecyclerView dateHorariosRecyclerView;
-    RecyclerView.LayoutManager mDateHorariosLayoutManager;
-    DateHorariosAdapter dateHorariosAdapter ;
-    private Date now;
     private User currentUser;
+
+    private ProgressDialog progress;
+    private List<DateHorarios> dateHorarios;
+    private Date now;
+    private RecyclerView dateHorariosRecyclerView;
+    private RecyclerView.LayoutManager mDateHorariosLayoutManager;
+    private DateHorariosAdapter dateHorariosAdapter ;
 
     private File createImageFile() throws IOException {
         // Create an image file name
@@ -112,8 +113,16 @@ public class MainActivity extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        currentToken = (( MyAplication ) getApplication() ).getCurrentAccesToken();
+        currentUser = (( MyAplication ) getApplication() ).getCurrentUser();
+        if ( currentToken .getAccessToken() == null ){
+            startActivity( new Intent( getApplicationContext(), LoginActivity.class ) );
+            finish();
+        }
 
         if (getIntent().getExtras() != null) {
             for (String key : getIntent().getExtras().keySet()) {
@@ -121,14 +130,13 @@ public class MainActivity extends AppCompatActivity  {
                 Log.d(TAG, "Key: " + key + " Value: " + value);
             }
         }
-
         now = new Date();
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
 
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                loadMe( currentToken, now, true );
+                loadSecciones( currentToken, now, true );
                 //swipeContainer.setRefreshing(false);
             }
         });
@@ -138,44 +146,10 @@ public class MainActivity extends AppCompatActivity  {
         mDateHorariosLayoutManager = new LinearLayoutManager( getApplicationContext() ) ;
         dateHorariosRecyclerView.setLayoutManager( mDateHorariosLayoutManager );
 
-        /*
-        final CalendarScheduleView calendarScheduleView = (CalendarScheduleView) findViewById(R.id.calendar_view);
-        calendarScheduleView.setOnEntryClickListener(new OnEntryClickListener() {
-            @Override
-            public void OnEntryClick(ICalendarEntry calendarEntry) {
-                if (calendarEntry != null) {
-                    Toast.makeText(getApplicationContext(), calendarEntry.getTitle(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        Calendar calendar = Calendar.getInstance();
-        for (int i = 1; i <= 20; ++i) {
-            List<ICalendarEntry> calendarEntries = new LinkedList<>();
-            calendar.add(Calendar.WEEK_OF_YEAR, new Random().nextBoolean() ? 1 : -1);
-            for (int j = 0; j < i; j++) {
-                final Date start = calendar.getTime();
-                calendarEntries.add(new CalendarEntry(start));
-
-                calendar.add(Calendar.HOUR, 6);
-            }
-            //calendarScheduleView.addAllEntries(calendarEntries);
-        }
-
-        AgendaCalendarView mAgendaCalendarView = (AgendaCalendarView) findViewById(R.id.agenda_calendar_view);
-
-        Calendar minDate = Calendar.getInstance();
-        Calendar maxDate = Calendar.getInstance();
-
-        minDate.add(Calendar.MONTH, 1);
-        minDate.set(Calendar.DAY_OF_MONTH, 1);
-        maxDate.add(Calendar.YEAR, 1);
-
-        List<CalendarEvent> eventList = new ArrayList<>();
-        mockList(eventList);
-
-        mAgendaCalendarView.init(eventList, minDate, maxDate, Locale.getDefault(), this);
-        */
+        if (  currentUser == null  )
+            loadMe( currentToken, now, false );
+        else
+            loadSecciones( currentToken, now, false );
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -193,27 +167,6 @@ public class MainActivity extends AppCompatActivity  {
 
         //CourseController courseController = new CourseController( );
         //courseController.start();
-
-        APIClient loginService = ServiceGenerator.createService(APIClient.class, API_OAUTH_CLIENTID, API_OAUTH_CLIENTSECRET );
-        Call<AccessToken> call = loginService.getNewAccessToken( "dulanto", "123523","password" );
-        call.enqueue(new Callback<AccessToken >() {
-            @Override
-            public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
-                try {
-                    Log.e( "onResponse", response.body().getAccessToken() );
-                    currentToken = response.body();
-                    //dispatchTakePictureIntent();
-                    loadMe( currentToken, now, false );
-                } catch ( NullPointerException e){
-                    Log.e( "NullPointerException", e.getMessage() );
-                }
-            }
-
-            @Override
-            public void onFailure(Call<AccessToken> call, Throwable t) {
-                Log.e( "onFailure", t.getMessage() );
-            }
-        } );
     }
 
     public void setupHorarios ( Date now, User currentUser, boolean refresh ){
@@ -269,11 +222,6 @@ public class MainActivity extends AppCompatActivity  {
                             c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
                             addDateHorarios(c, seccion, horario);
                         }
-                        /*
-                        final Date start = calendar.getTime();
-                        calendarEntries.add( new CalendarEntry( start )  );
-                        calendar.add(Calendar.HOUR, 2);
-                        */
                     }
                 }
             } catch (ParseException e) {
@@ -291,6 +239,13 @@ public class MainActivity extends AppCompatActivity  {
         }
     }
 
+    public void loadSecciones(final AccessToken accessToken, final Date now, final boolean refresh ){
+        if ( currentUser.getSecciones().size() > 0 )  {
+            dateHorarios = new ArrayList<>();
+            setupHorarios( now, currentUser, refresh );
+        }
+        swipeContainer.setRefreshing(false);
+    }
     public void loadMe(final AccessToken accessToken, final Date now, final boolean refresh ){
         APIClient loginService = ServiceGenerator.createService(APIClient.class, accessToken , getApplicationContext(), true );
         Call<User> callUserMe = loginService.getUserMe();
@@ -301,13 +256,11 @@ public class MainActivity extends AppCompatActivity  {
                     currentUser = response.body();
                     APIClient tokenDevice = ServiceGenerator.createService(APIClient.class, accessToken , getApplicationContext(), false );
                     String token = FirebaseInstanceId.getInstance().getToken();
-                    Log.e( "token", token );
                     if ( token != null ){
                         Call<Void> callUserMe = tokenDevice.registerDeviceNotification( token, "Android", currentUser.getCorreo() );
                         callUserMe.enqueue(new Callback<Void>() {
                             @Override
                             public void onResponse(Call<Void> call, Response<Void> response) {
-                                Log.e( "token", response.code() + "" );
                                 //FirebaseMessaging.getInstance().subscribeToTopic("news");
                             }
                             @Override
@@ -375,36 +328,6 @@ public class MainActivity extends AppCompatActivity  {
         }
         return  index;
     }
-
-    /*
-    private void mockList(List<CalendarEvent> eventList) {
-        Calendar startTime1 = Calendar.getInstance();
-        Calendar endTime1 = Calendar.getInstance();
-        endTime1.add(Calendar.MONTH, 1);
-        BaseCalendarEvent event1 = new BaseCalendarEvent("Thibault travels in Iceland", "A wonderful journey!", "Iceland",
-                ContextCompat.getColor(this, R.color.theme_accent), startTime1, endTime1, true);
-        eventList.add(event1);
-
-        Calendar startTime2 = Calendar.getInstance();
-        startTime2.add(Calendar.DAY_OF_YEAR, 1);
-        Calendar endTime2 = Calendar.getInstance();
-        endTime2.add(Calendar.DAY_OF_YEAR, 3);
-        BaseCalendarEvent event2 = new BaseCalendarEvent("Visit to Dalvík", "A beautiful small town", "Dalvík",
-                ContextCompat.getColor(this, R.color.theme_accent), startTime2, endTime2, true);
-        eventList.add(event2);
-
-        // Example on how to provide your own layout
-        Calendar startTime3 = Calendar.getInstance();
-        Calendar endTime3 = Calendar.getInstance();
-        startTime3.set(Calendar.HOUR_OF_DAY, 14);
-        startTime3.set(Calendar.MINUTE, 0);
-        endTime3.set(Calendar.HOUR_OF_DAY, 15);
-        endTime3.set(Calendar.MINUTE, 0);
-        DrawableCalendarEvent event3 = new DrawableCalendarEvent("Visit of Harpa", "", "Dalvík",
-                ContextCompat.getColor(this, R.color.blue_dark), startTime3, endTime3, false, R.drawable.common_ic_googleplayservices);
-        eventList.add(event3);
-    }
-    */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

@@ -1,11 +1,9 @@
 package pe.edu.utp.toolsteacherutp.Interfaces;
 
-import org.json.JSONObject;
-
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import pe.edu.utp.toolsteacherutp.Models.Media;
-import pe.edu.utp.toolsteacherutp.Rest.AccessToken;
+import pe.edu.utp.toolsteacherutp.Models.AccessToken;
 import pe.edu.utp.toolsteacherutp.Models.User;
 import retrofit2.Call;
 import retrofit2.http.Field;
