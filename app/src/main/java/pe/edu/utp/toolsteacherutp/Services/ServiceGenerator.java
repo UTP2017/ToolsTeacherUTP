@@ -87,7 +87,7 @@ public class ServiceGenerator {
                             .header("Accept", "application/json")
                             .header("Content-Disposition", "attachment; filename=\"" + path + "\"")
                             .header("Authorization",
-                                    token.getTokenType() + " " + token.getAccessToken())
+                                    token.getToken_type() + " " + token.getAccess_token())
                             .method(original.method(), original.body());
 
                     Request request = requestBuilder.build();
@@ -122,7 +122,7 @@ public class ServiceGenerator {
                                 //.header("Content-type", "application/json")
                                 //.header("Content-type", "application/x-www-form-urlencoded")
                                 .header("Authorization",
-                                        token.getTokenType() + " " + token.getAccessToken())
+                                        token.getToken_type() + " " + token.getAccess_token())
                                 .method(original.method(), original.body());
                     }
                     else {
@@ -131,7 +131,7 @@ public class ServiceGenerator {
                                 //.header("Content-type", "application/json")
                                 //.header("Content-type", "application/x-www-form-urlencoded")
                                 .header("Authorization",
-                                        token.getTokenType() + " " + token.getAccessToken())
+                                        token.getToken_type() + " " + token.getAccess_token())
                                 .method(original.method(), original.body());
                     }
 

@@ -4,8 +4,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -46,16 +48,27 @@ public class FBMessagingService extends FirebaseMessagingService {
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.utp)
                 .setContentTitle(titleNotification)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isVibrate = preference.getBoolean("notifications_new_message_vibrate", false);
+        boolean isNoticate = preference.getBoolean("notifications_new_message", false);
+        if ( isNoticate ){
+            String strRingtonePreference = preference.getString("notifications_new_message_ringtone", "DEFAULT_SOUND");
+            notificationBuilder.setSound( Uri.parse(strRingtonePreference) );
+            if ( isVibrate ){
+                notificationBuilder.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
+            }
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(0, notificationBuilder.build());
+            notificationManager.notify(0, notificationBuilder.build());
+        }
+
     }
 }

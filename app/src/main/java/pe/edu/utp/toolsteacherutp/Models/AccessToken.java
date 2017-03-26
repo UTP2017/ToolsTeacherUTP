@@ -1,52 +1,64 @@
 package pe.edu.utp.toolsteacherutp.Models;
 
+import com.orm.SugarRecord;
+
 import org.json.JSONObject;
 
 /**
  * Created by elbuenpixel on 10/03/17.
  */
 
-public class AccessToken {
+public class AccessToken  extends SugarRecord {
     private String access_token;
     private String token_type;
-    private Integer expires_in;
+    private Long expires_in;
     private String refresh_token;
     private String scope;
 
-    public String getAccessToken() {
+    public AccessToken() {
+    }
+
+    public AccessToken(String access_token, String token_type, Long expires_in, String refresh_token, String scope) {
+        this.access_token = access_token;
+        this.token_type = token_type;
+        this.expires_in = expires_in;
+        this.refresh_token = refresh_token;
+        this.scope = scope;
+    }
+
+    public AccessToken findByAccessToken( String access_token ){
+        return AccessToken.find( AccessToken.class, "accessToken = ?", access_token ).get(0);
+    }
+
+    public String getAccess_token() {
         return access_token;
     }
 
-    public void setAccessToken(String access_token) {
+    public void setAccess_token(String access_token) {
         this.access_token = access_token;
     }
 
-    public String getTokenType() {
-        // OAuth requires uppercase Authorization HTTP header value for token type
-        if(!Character.isUpperCase(token_type.charAt(0))) {
-            token_type = Character.toString(token_type.charAt(0)).toUpperCase() + token_type.substring(1);
-        }
-
+    public String getToken_type() {
         return token_type;
     }
 
-    public void setTokenType(String token_type) {
+    public void setToken_type(String token_type) {
         this.token_type = token_type;
     }
 
-    public int getExpiry() {
+    public Long getExpires_in() {
         return expires_in;
     }
 
-    public void setExpiry(int expires_in) {
+    public void setExpires_in(Long expires_in) {
         this.expires_in = expires_in;
     }
 
-    public String getRefreshToken() {
+    public String getRefresh_token() {
         return refresh_token;
     }
 
-    public void setRefreshToken(String refresh_token) {
+    public void setRefresh_token(String refresh_token) {
         this.refresh_token = refresh_token;
     }
 
@@ -58,8 +70,4 @@ public class AccessToken {
         this.scope = scope;
     }
 
-    @Override
-    public String toString() {
-        return "{\"access_token\": \""+ getAccessToken() +"\", \"expires_in\": " + getExpiry() +  ", \"token_type\": \"" + getTokenType() + "\", \"scope\": \""+ getScope() +"\", \"refresh_token\": \""+ getRefreshToken() + "\"}";
-    }
 }

@@ -46,18 +46,18 @@
             android:textIsSelectable="true"
             android:textColor="@color/colorPrimaryText"
             android:layout_width="wrap_content"
-            android:text="Desarrollo de Software 1"
+            android:text="Curso 0000000"
             android:layout_height="match_parent" />
         <TextView
             android:id="@+id/seccionNameTextView"
             android:layout_width="wrap_content"
-            android:text="S20171003"
+            android:text="S0000000"
             android:textColor="@color/colorPrimaryText"
             android:layout_height="match_parent" />
         <TextView
             android:id="@+id/labNameTextView"
             android:layout_width="wrap_content"
-            android:text="E0209"
+            android:text="E00000"
             android:textIsSelectable="true"
             android:textColor="@color/colorPrimary"
             android:layout_height="match_parent" />
@@ -65,7 +65,7 @@
             android:id="@+id/sedeNameTextView"
             android:textColor="@color/colorPrimary"
             android:layout_width="wrap_content"
-            android:text="Sede Central"
+            android:text="Sede 00000"
             android:layout_height="match_parent" />
     </LinearLayout>
 </LinearLayout>

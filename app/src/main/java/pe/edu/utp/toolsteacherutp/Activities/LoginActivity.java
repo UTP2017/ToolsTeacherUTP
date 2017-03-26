@@ -22,10 +22,10 @@ import android.widget.EditText;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
-import java.util.ArrayList;
-
 import pe.edu.utp.toolsteacherutp.BuildConfig;
 import pe.edu.utp.toolsteacherutp.Interfaces.APIClient;
+import pe.edu.utp.toolsteacherutp.Models.Horario;
+import pe.edu.utp.toolsteacherutp.Models.Seccion;
 import pe.edu.utp.toolsteacherutp.Models.User;
 import pe.edu.utp.toolsteacherutp.MyAplication;
 import pe.edu.utp.toolsteacherutp.R;
@@ -50,12 +50,9 @@ public class LoginActivity extends AppCompatActivity  {
     private ProgressDialog progress = null;
     private User currentUser;
 
-
     // UI references.
-    private AutoCompleteTextView mUserNameView;
+    private EditText mUserNameView;
     private EditText mPasswordView;
-    private View mProgressView;
-    private View mLoginFormView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,32 +60,27 @@ public class LoginActivity extends AppCompatActivity  {
         setContentView(R.layout.activity_login);
         // Set up the login form.
         SharedPreferences prefs = getApplicationContext().getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
-        if ( prefs.getBoolean( "oauth.loggedin", false ) ){
-            startActivity( new Intent( getApplicationContext(), MainActivity.class ) );
+        progress = new ProgressDialog(this);
+        progress.setMessage("Iniciando Sesión");
+        progress.setCancelable(false);
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        currentToken = (( MyAplication ) getApplication() ).getCurrentAccesToken();
+        if ( currentToken !=null && currentToken.getAccess_token() !=null ){
+            Log.e( TAG, TAG );
+            startActivity( new Intent( this, MainActivity.class ) );
             finish();
         }
 
-        mUserNameView = (AutoCompleteTextView) findViewById(R.id.username);
-
+        mUserNameView = (EditText) findViewById(R.id.username);
         mPasswordView = (EditText) findViewById(R.id.password);
-
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
             }
         });
-
-        progress = new ProgressDialog(this);
-        progress.setMessage("Iniciando Sesión");
-        progress.setCancelable(false);
-        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-
-
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
-        currentToken = (( MyAplication ) getApplication() ).getCurrentAccesToken();
     }
 
     /**
@@ -100,7 +92,6 @@ public class LoginActivity extends AppCompatActivity  {
         if (progress.isShowing() ) {
             return;
         }
-        Log.e( TAG,  "attemptLogin" );
         // Reset errors.
         mUserNameView.setError(null);
         mPasswordView.setError(null);
@@ -129,23 +120,14 @@ public class LoginActivity extends AppCompatActivity  {
             focusView = mUserNameView;
             cancel = true;
         }
-        /*
-        else if (!isEmailValid(email)) {
-            mUserNameView.setError(getString(R.string.error_invalid_email));
-            focusView = mUserNameView;
-            cancel = true;
-        }
-        */
         if (cancel) {
             focusView.requestFocus();
         } else {
-            //showProgress(true);
             progress.show();
-            if( currentToken.getAccessToken() != null ){
+            if ( currentToken !=null && currentToken.getAccess_token() !=null ){
                 SharedPreferences prefs = getApplicationContext().getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
                 prefs.edit().putBoolean("oauth.loggedin", true).apply();
-                Log.e( TAG, "loadMe" );
-                Log.e( TAG, currentToken.getExpiry() + "" );
+                Log.e( TAG, currentToken.getExpires_in() + "" );
                 loadMe( currentToken );
             }
             else {
@@ -162,38 +144,6 @@ public class LoginActivity extends AppCompatActivity  {
         return password.length() > 4;
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
 
     public void loadMe(final AccessToken accessToken ){
         APIClient loginService = ServiceGenerator.createService(APIClient.class, accessToken , getApplicationContext(), true );
@@ -203,18 +153,29 @@ public class LoginActivity extends AppCompatActivity  {
             public void onResponse(Call<User> call, Response<User> response) {
                 try {
                     int statusCode = response.code();
+                    Log.e( TAG, "loadMe " + statusCode );
                     if( statusCode == 200) {
                         currentUser = response.body();
                         ((MyAplication) getApplication() ).setCurrentUser( currentUser );
 
                         String token = FirebaseInstanceId.getInstance().getToken();
+                        SharedPreferences prefs = getApplicationContext().getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
+                        prefs.edit().putLong("user.id", currentUser.getId()).apply();
+                        prefs.edit().putString("user.name", currentUser.getName()).apply();
+                        prefs.edit().putString("user.rol", currentUser.getRol()).apply();
+                        prefs.edit().putString("user.correo", currentUser.getCorreo()).apply();
+                        prefs.edit().putString("user.avatar", currentUser.getAvatar()).apply();
+
+                        Seccion.deleteAll(Seccion.class);
+                        Horario.deleteAll(Horario.class);
+                        currentUser.save();
+
                         if ( token != null ){
                             APIClient tokenDevice = ServiceGenerator.createService(APIClient.class, accessToken , getApplicationContext(), false );
                             Call<Void> callUserMe = tokenDevice.registerDeviceNotification( token, "Android", currentUser.getCorreo() );
                             callUserMe.enqueue(new Callback<Void>() {
                                 @Override
                                 public void onResponse(Call<Void> call, Response<Void> response) {
-                                    //FirebaseMessaging.getInstance().subscribeToTopic("news");
                                     startActivity( new Intent( getApplicationContext(), MainActivity.class ));
                                     finish();
                                 }
@@ -256,19 +217,22 @@ public class LoginActivity extends AppCompatActivity  {
             @Override
             public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
                 try {
-                    Log.e( TAG, "onResponse " + response.body().getAccessToken() );
+                    Log.e( TAG, "onResponse " + response.body().getAccess_token() );
                     int statusCode = response.code();
                     if(statusCode == 200) {
                         currentToken = response.body();
+                        Log.e( TAG, "currentToken " + currentToken.getRefresh_token() );
                         SharedPreferences prefs = getApplicationContext().getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
+                        Long tsLong = System.currentTimeMillis()/1000;
+                        tsLong += currentToken.getExpires_in();
+                        currentToken.setExpires_in( tsLong  );
                         prefs.edit().putBoolean("oauth.loggedin", true).apply();
-                        prefs.edit().putString("oauth.access_token", currentToken.getAccessToken()).apply();
-                        prefs.edit().putString("oauth.refresh_token", currentToken.getRefreshToken()).apply();
-                        prefs.edit().putString("oauth.token_type", currentToken.getTokenType()).apply();
+                        prefs.edit().putString("oauth.access_token", currentToken.getAccess_token()).apply();
+                        prefs.edit().putString("oauth.refresh_token", currentToken.getRefresh_token()).apply();
+                        prefs.edit().putString("oauth.token_type", currentToken.getToken_type()).apply();
                         prefs.edit().putString("oauth.scope", currentToken.getScope()).apply();
-                        prefs.edit().putString("oauth.currentToken", currentToken.toString()).apply();
-                        prefs.edit().putInt("oauth.expires_in", currentToken.getExpiry()).apply();
-
+                        prefs.edit().putLong("oauth.expires_in", currentToken.getExpires_in() ).apply();
+                        currentToken.save();
                         loadMe( currentToken );
                     }
                     else {

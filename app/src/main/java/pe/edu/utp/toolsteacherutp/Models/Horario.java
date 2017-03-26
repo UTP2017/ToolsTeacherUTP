@@ -1,10 +1,11 @@
 package pe.edu.utp.toolsteacherutp.Models;
 
+import com.orm.SugarRecord;
+
 /**
  * Created by elbuenpixel on 11/03/17.
  */
-public class Horario {
-    private int ID;
+public class Horario extends SugarRecord {
     private String post_content;
     private String post_title;
     private String hora_inicio;
@@ -12,15 +13,6 @@ public class Horario {
     private String aula;
     private String sede;
     private String curso;
-
-    public String getSeccion() {
-        return seccion;
-    }
-
-    public void setSeccion(String seccion) {
-        this.seccion = seccion;
-    }
-
     private String seccion;
     private boolean lunes;
     private boolean martes;
@@ -29,6 +21,47 @@ public class Horario {
     private boolean viernes;
     private boolean sabado;
     private boolean domingo;
+    private Long seccion_id;
+    private Long horario_id;
+
+    public Horario() {
+    }
+
+    public Horario(String post_content, String post_title, String hora_inicio, String hora_fin, String aula, String sede, String curso, String seccion, boolean lunes, boolean martes, boolean miercoles, boolean jueves, boolean viernes, boolean sabado, boolean domingo, Long seccion_id, Long horario_id) {
+        this.post_content = post_content;
+        this.post_title = post_title;
+        this.hora_inicio = hora_inicio;
+        this.hora_fin = hora_fin;
+        this.aula = aula;
+        this.sede = sede;
+        this.curso = curso;
+        this.seccion = seccion;
+        this.lunes = lunes;
+        this.martes = martes;
+        this.miercoles = miercoles;
+        this.jueves = jueves;
+        this.viernes = viernes;
+        this.sabado = sabado;
+        this.domingo = domingo;
+        this.seccion_id = seccion_id;
+        this.horario_id = horario_id;
+    }
+
+    public Long getSeccion_id() {
+        return seccion_id;
+    }
+
+    public void setSeccion_id(Long seccion_id) {
+        this.seccion_id = seccion_id;
+    }
+
+    public String getSeccion() {
+        return seccion;
+    }
+
+    public void setSeccion(String seccion) {
+        this.seccion = seccion;
+    }
 
     public String getAula() {
         return aula;
@@ -52,14 +85,6 @@ public class Horario {
 
     public void setCurso(String curso) {
         this.curso = curso;
-    }
-
-    public int getID() {
-        return ID;
-    }
-
-    public void setID(int ID) {
-        this.ID = ID;
     }
 
     public String getPost_content() {
