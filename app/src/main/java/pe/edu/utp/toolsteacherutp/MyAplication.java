@@ -64,7 +64,6 @@ public class MyAplication extends SugarApp {
                     setAccessToken( currentToken );
                 }
                 else {
-                    currentToken.delete();
                     User.deleteAll(User.class);
                     AccessToken.deleteAll(AccessToken.class);
                     Seccion.deleteAll(Seccion.class);
@@ -94,9 +93,6 @@ public class MyAplication extends SugarApp {
         SharedPreferences prefs = getApplicationContext().getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
         _access_token = prefs.getString( "oauth.access_token", "" );
         if ( !_access_token.equals("") ){
-            AccessToken currentToken;
-            currentToken = accessToken.findByAccessToken( _access_token );
-            currentToken.delete();
             User.deleteAll(User.class);
             AccessToken.deleteAll(AccessToken.class);
             Seccion.deleteAll(Seccion.class);

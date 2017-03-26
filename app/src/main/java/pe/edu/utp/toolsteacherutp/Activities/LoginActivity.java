@@ -19,6 +19,7 @@ import android.view.View.OnClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -124,6 +125,7 @@ public class LoginActivity extends AppCompatActivity  {
             focusView.requestFocus();
         } else {
             progress.show();
+            currentToken = ((MyAplication) getApplication() ).getCurrentAccesToken();
             if ( currentToken !=null && currentToken.getAccess_token() !=null ){
                 SharedPreferences prefs = getApplicationContext().getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
                 prefs.edit().putBoolean("oauth.loggedin", true).apply();
@@ -153,9 +155,14 @@ public class LoginActivity extends AppCompatActivity  {
             public void onResponse(Call<User> call, Response<User> response) {
                 try {
                     int statusCode = response.code();
-                    Log.e( TAG, "loadMe " + statusCode );
                     if( statusCode == 200) {
                         currentUser = response.body();
+                        if( !currentUser.getRol().equals("teacher") ){
+                            Toast.makeText(LoginActivity.this, "Sólo pueden acceder los docentes", Toast.LENGTH_SHORT).show();
+                            ((MyAplication) getApplication() ).signOut();
+                            progress.cancel();
+                            return;
+                        }
                         ((MyAplication) getApplication() ).setCurrentUser( currentUser );
 
                         String token = FirebaseInstanceId.getInstance().getToken();
@@ -177,6 +184,7 @@ public class LoginActivity extends AppCompatActivity  {
                                 @Override
                                 public void onResponse(Call<Void> call, Response<Void> response) {
                                     startActivity( new Intent( getApplicationContext(), MainActivity.class ));
+                                    progress.cancel();
                                     finish();
                                 }
                                 @Override
@@ -217,11 +225,9 @@ public class LoginActivity extends AppCompatActivity  {
             @Override
             public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
                 try {
-                    Log.e( TAG, "onResponse " + response.body().getAccess_token() );
                     int statusCode = response.code();
                     if(statusCode == 200) {
                         currentToken = response.body();
-                        Log.e( TAG, "currentToken " + currentToken.getRefresh_token() );
                         SharedPreferences prefs = getApplicationContext().getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
                         Long tsLong = System.currentTimeMillis()/1000;
                         tsLong += currentToken.getExpires_in();
